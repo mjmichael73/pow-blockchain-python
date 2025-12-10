@@ -1,22 +1,30 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import Crypto
 import Crypto.Random
 from Crypto.PublicKey import RSA
 import binascii
+from collections import OrderedDict
 
 class Transaction:
     def __init__(
             self,
-            sender_address,
+            sender_public_key,
             sender_private_key,
-            receiver_address,
-            value
+            recipient_public_key,
+            amount
     ):
-        self.sender_address = sender_address
+        self.sender_public_key = sender_public_key
         self.sender_private_key = sender_private_key
-        self.receiver_address = receiver_address
-        self.value = value
+        self.recipient_public_key = recipient_public_key
+        self.amount = amount
 
+    def to_dict(self):
+        return OrderedDict({
+            "sender_public_key": self.sender_public_key,
+            "sender_private_key": self.sender_private_key,
+            "recipient_public_key": self.recipient_public_key,
+            "amount": self.amount,
+        })
 
 app = Flask(__name__)
 
@@ -27,7 +35,21 @@ def index():
 
 @app.route("/generate/transaction", methods=['POST'])
 def generate_transaction():
-    return 'Done!'
+    sender_public_key = request.form['sender_public_key']
+    sender_private_key = request.form['sender_private_key']
+    recipient_public_key = request.form['recipient_public_key']
+    amount = request.form['amount']
+    transaction = Transaction(
+        sender_public_key=sender_public_key,
+        sender_private_key=sender_private_key,
+        recipient_public_key=recipient_public_key,
+        amount=amount
+    )
+    response = {
+        "transaction": transaction.to_dict(),
+        "signature": "BLAH"
+    }
+    return jsonify(response)
 
 @app.route("/make/transaction")
 def make_transaction():
