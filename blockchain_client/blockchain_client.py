@@ -25,6 +25,9 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route("/generate/transaction", methods=['POST'])
+def generate_transaction():
+    return 'Done!'
 
 @app.route("/make/transaction")
 def make_transaction():
