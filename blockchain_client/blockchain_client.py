@@ -4,6 +4,8 @@ import Crypto.Random
 from Crypto.PublicKey import RSA
 import binascii
 from collections import OrderedDict
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA
 
 class Transaction:
     def __init__(
@@ -26,6 +28,12 @@ class Transaction:
             "amount": self.amount,
         })
 
+    def sign_transaction(self):
+        private_key = RSA.importKey(binascii.unhexlify(self.sender_private_key))
+        signer = PKCS1_v1_5.new(private_key)
+        hash = SHA.new(str(self.to_dict()).encode("utf8"))
+        return binascii.hexlify(signer.sign(hash)).decode("ascii")
+
 app = Flask(__name__)
 
 
@@ -47,7 +55,7 @@ def generate_transaction():
     )
     response = {
         "transaction": transaction.to_dict(),
-        "signature": "BLAH"
+        "signature": transaction.sign_transaction()
     }
     return jsonify(response)
 
