@@ -1,0 +1,15 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203, W503
+exclude =
+    .git,
+    __pycache__,
+    docs/source/conf.py,
+    old,
+    build,
+    dist,
+    .venv,
+    .venv/
+# We will use the folders directly in the command line or just let it run if it's fine.
+# But black standard is 88, and E203 is incompatible with black.
+# W503 is also often ignored for PEP8 compliance with modern decorators/etc.

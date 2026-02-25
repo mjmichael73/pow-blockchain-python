@@ -84,7 +84,7 @@ def new_transaction():
         values["transaction_signature"],
         values["confirmation_amount"],
     )
-    if transaction_results == False:
+    if transaction_results is False:
         response = {"message": "Invalid transaction/signature"}
         return jsonify(response), 406
     else:

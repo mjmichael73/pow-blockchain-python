@@ -1,0 +1,24 @@
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+# Restricting Black to specific folders if we run it from root
+# However, usually we just pass the folders to the command.
+# To make it "only check" these folders by default if no path is given:
+# Black doesn't easily support "default paths" in pyproject.toml without a plugin or wrapper,
+# but we can configure it to exclude everything else if desired, but that's messy.
+# Better to expect the user or CI to run `black blockchain blockchain_client`.
