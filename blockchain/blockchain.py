@@ -14,17 +14,19 @@ class Blockchain:
         self.transactions = []
         self.chain = []
         # Create the genesis block
-        self.create_block(0, '00')
+        self.create_block(0, "00")
 
     def create_block(self, nonce, previous_hash):
         """
         Add a block of transactions to the blockchain
         """
-        block = {'block_number': len(self.chain) + 1,
-                 'timestamp': time(),
-                 'transactions': self.transactions,
-                 'nonce': nonce,
-                 'previous_hash': previous_hash}
+        block = {
+            "block_number": len(self.chain) + 1,
+            "timestamp": time(),
+            "transactions": self.transactions,
+            "nonce": nonce,
+            "previous_hash": previous_hash,
+        }
 
         # Reset the current list of transactions
         self.transactions = []
@@ -36,19 +38,21 @@ class Blockchain:
         h = SHA.new(str(transaction).encode("utf8"))
         return verifier.verify(h, binascii.unhexlify(signature))
 
-    def submit_transaction(self, sender_public_key, recipient_public_key, signature, amount):
+    def submit_transaction(
+        self, sender_public_key, recipient_public_key, signature, amount
+    ):
         # TODO: Reward the miner
         # TODO: Signature validation
 
-        transaction = OrderedDict({
-            'sender_public_key': sender_public_key,
-            'recipient_public_key': recipient_public_key,
-            'amount': amount
-        })
+        transaction = OrderedDict(
+            {
+                "sender_public_key": sender_public_key,
+                "recipient_public_key": recipient_public_key,
+                "amount": amount,
+            }
+        )
         signature_verification = self.verify_transaction_signature(
-            sender_public_key,
-            signature,
-            transaction
+            sender_public_key, signature, transaction
         )
         if signature_verification:
             self.transactions.append(transaction)
@@ -65,31 +69,40 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('./index.html')
+    return render_template("./index.html")
 
 
-@app.route('/transactions/new', methods=['POST'])
+@app.route("/transactions/new", methods=["POST"])
 def new_transaction():
     values = request.form
     # TODO: check the required fields
-    transaction_results = blockchain.submit_transaction(values['confirmation_sender_public_key'],
-                                                        values['confirmation_recipient_public_key'],
-                                                        values['transaction_signature'], values['confirmation_amount'])
+    transaction_results = blockchain.submit_transaction(
+        values["confirmation_sender_public_key"],
+        values["confirmation_recipient_public_key"],
+        values["transaction_signature"],
+        values["confirmation_amount"],
+    )
     if transaction_results == False:
-        response = {'message': 'Invalid transaction/signature'}
+        response = {"message": "Invalid transaction/signature"}
         return jsonify(response), 406
     else:
-        response = {'message': 'Transaction will be added to the Block ' + str(transaction_results)}
+        response = {
+            "message": "Transaction will be added to the Block "
+            + str(transaction_results)
+        }
         return jsonify(response), 201
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5001, type=int, help="port to listen to")
+    parser.add_argument(
+        "-p", "--port", default=5001, type=int, help="port to listen to"
+    )
     args = parser.parse_args()
     port = args.port
 
-    app.run(host='127.0.0.1', port=port, debug=True)
+    app.run(host="127.0.0.1", port=port, debug=True)
