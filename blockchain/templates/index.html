@@ -122,6 +122,20 @@
                     console.log(error);
                 }
             });
+
+            $('#mine_button').click(function() {
+                $.ajax({
+                    url: '/mine',
+                    type: 'GET',
+                    success: function(response) {
+                        window.location.reload();
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+
+                });
+            });
         });
 
     </script>

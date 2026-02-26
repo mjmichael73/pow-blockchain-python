@@ -6,8 +6,10 @@ import binascii
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
+from uuid import uuid4
 
 MINING_SENDER = "The Blockchain"
+MINING_REWARD = 1
 
 
 class Blockchain:
@@ -15,6 +17,7 @@ class Blockchain:
     def __init__(self):
         self.transactions = []
         self.chain = []
+        self.node_id = str(uuid4()).replace("-", "")
         # Create the genesis block
         self.create_block(0, "00")
 
@@ -33,6 +36,7 @@ class Blockchain:
         # Reset the current list of transactions
         self.transactions = []
         self.chain.append(block)
+        return block
 
     def verify_transaction_signature(self, sender_public_key, signature, transaction):
         public_key = RSA.importKey(binascii.unhexlify(sender_public_key))
@@ -43,6 +47,12 @@ class Blockchain:
             return True
         except ValueError:
             return False
+
+    def proof_of_work(self):
+        return 12345
+
+    def hash(self, block):
+        return "abc"
 
     def submit_transaction(
         self, sender_public_key, recipient_public_key, signature, amount
@@ -60,7 +70,7 @@ class Blockchain:
             self.transactions.append(transaction)
             return len(self.chain) + 1
         else:
-            # Transaction from a wallet to another wallet
+            # Transaction from wallet to another wallet
             signature_verification = self.verify_transaction_signature(
                 sender_public_key, signature, transaction
             )
@@ -91,6 +101,32 @@ def get_transactions():
     return jsonify(response), 200
 
 
+@app.route("/mine", methods=["GET"])
+def mine():
+    # We run the proof of work algorithm
+    nonce = blockchain.proof_of_work()
+
+    blockchain.submit_transaction(
+        sender_public_key=MINING_SENDER,
+        recipient_public_key=blockchain.node_id,
+        signature="",
+        amount=MINING_REWARD,
+    )
+
+    last_block = blockchain.chain[-1]
+    previous_hash = blockchain.hash(last_block)
+    block = blockchain.create_block(nonce, previous_hash)
+
+    response = {
+        "message": "New block created",
+        "block_number": block["block_number"],
+        "transactions": block["transactions"],
+        "nonce": block["nonce"],
+        "previous_hash": block["previous_hash"],
+    }
+    return jsonify(response), 200
+
+
 @app.route("/transactions/new", methods=["POST"])
 def new_transaction():
     values = request.form
@@ -101,7 +137,7 @@ def new_transaction():
         "confirmation_amount",
     ]
     if not all(k in values for k in required):
-        return jsonify({"message": "Missing required field"}), 400
+        return "Missing values", 400
 
     transaction_results = blockchain.submit_transaction(
         values["confirmation_sender_public_key"],
