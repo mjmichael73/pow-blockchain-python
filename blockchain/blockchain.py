@@ -101,6 +101,13 @@ def get_transactions():
     return jsonify(response), 200
 
 
+@app.route("/chain", methods=["GET"])
+def get_chain():
+    response = {"chain": blockchain.chain, "length": len(blockchain.chain)}
+
+    return jsonify(response), 200
+
+
 @app.route("/mine", methods=["GET"])
 def mine():
     # We run the proof of work algorithm
