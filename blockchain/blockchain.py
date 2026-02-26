@@ -7,6 +7,8 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
 from uuid import uuid4
+import json
+import hashlib
 
 MINING_SENDER = "The Blockchain"
 MINING_REWARD = 1
@@ -52,7 +54,10 @@ class Blockchain:
         return 12345
 
     def hash(self, block):
-        return "abc"
+        block_string = json.dumps(block, sort_keys=True).encode("utf8")
+        h = hashlib.new("sha256")
+        h.update(block_string)
+        return h.hexdigest()
 
     def submit_transaction(
         self, sender_public_key, recipient_public_key, signature, amount
