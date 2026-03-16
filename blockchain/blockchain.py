@@ -10,6 +10,7 @@ from uuid import uuid4
 import json
 import hashlib
 import requests
+from urllib.parse import urlparse
 
 MINING_SENDER = "The Blockchain"
 MINING_REWARD = 1
@@ -155,6 +156,15 @@ class Blockchain:
             else:
                 return False
 
+    def register_node(self, node_url):
+        parsed_url = urlparse(node_url)
+        if parsed_url.netloc:
+            self.nodes.add(parsed_url.netloc)
+        elif parsed_url.path:
+            self.nodes.add(parsed_url.path)
+        else:
+            raise ValueError("Invalid URL")
+
 
 # Instantiate the Blockchain
 blockchain = Blockchain()
@@ -236,6 +246,28 @@ def new_transaction():
             + str(transaction_results)
         }
         return jsonify(response), 201
+
+
+@app.route("/nodes/get", methods=["GET"])
+def get_nodes():
+    nodes = list(blockchain.nodes)
+    response = {"nodes": nodes}
+    return jsonify(response), 200
+
+
+@app.route("/nodes/register", methods=["POST"])
+def register_node():
+    values = request.form
+    nodes = values.get("nodes").replace(" ", "").split(",")
+    if nodes is None:
+        return "Error: Please supply a valid list of nodes", 400
+    for node in nodes:
+        blockchain.register_node(node)
+    response = {
+        "message": "New nodes have been added",
+        "total_nodes": list(blockchain.nodes),
+    }
+    return jsonify(response), 201
 
 
 if __name__ == "__main__":
