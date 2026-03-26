@@ -1,0 +1,29 @@
+
+services:
+  blockchain-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    command: python blockchain/main.py -p 5001
+    ports:
+      - "5001:5001"
+
+  blockchain-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    command: python blockchain_client/main.py -p 8081
+    ports:
+      - "8081:8081"
+
+  # Optional: A second node to demonstrate the P2P network
+  blockchain-node-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    command: python blockchain/main.py -p 5002
+    ports:
+      - "5002:5002"
