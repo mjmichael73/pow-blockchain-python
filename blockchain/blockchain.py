@@ -27,6 +27,15 @@ class Blockchain:
         # Create the genesis block
         self.create_block(0, "00")
 
+    def register_node(self, node_url):
+        parsed_url = urlparse(node_url)
+        if parsed_url.netloc:
+            self.nodes.add(parsed_url.netloc)
+        elif parsed_url.path:
+            self.nodes.add(parsed_url.path)
+        else:
+            raise ValueError("Invalid URL")
+
     def create_block(self, nonce, previous_hash):
         """
         Add a block of transactions to the blockchain
@@ -129,7 +138,6 @@ class Blockchain:
 
         return True
 
-    @staticmethod
     def submit_transaction(
         self, sender_public_key, recipient_public_key, signature, amount
     ):
@@ -156,15 +164,6 @@ class Blockchain:
             else:
                 return False
 
-    def register_node(self, node_url):
-        parsed_url = urlparse(node_url)
-        if parsed_url.netloc:
-            self.nodes.add(parsed_url.netloc)
-        elif parsed_url.path:
-            self.nodes.add(parsed_url.path)
-        else:
-            raise ValueError("Invalid URL")
-
 
 # Instantiate the Blockchain
 blockchain = Blockchain()
@@ -177,6 +176,11 @@ CORS(app)
 @app.route("/")
 def index():
     return render_template("./index.html")
+
+
+@app.route("/configure")
+def configure():
+    return render_template("./configure.html")
 
 
 @app.route("/transactions/get", methods=["GET"])
@@ -255,19 +259,34 @@ def get_nodes():
     return jsonify(response), 200
 
 
+@app.route("/nodes/resolve", methods=["GET"])
+def consensus():
+    replaced = blockchain.resolve_conflicts()
+
+    if replaced:
+        response = {"message": "Our chain was replaced", "new_chain": blockchain.chain}
+    else:
+        response = {"message": "Our chain is authoritative", "chain": blockchain.chain}
+    return jsonify(response), 200
+
+
 @app.route("/nodes/register", methods=["POST"])
 def register_node():
     values = request.form
+    # 127.0.0.1:5002,127.0.0.1:5003, 127.0.0.1:5004
     nodes = values.get("nodes").replace(" ", "").split(",")
+
     if nodes is None:
         return "Error: Please supply a valid list of nodes", 400
+
     for node in nodes:
         blockchain.register_node(node)
+
     response = {
-        "message": "New nodes have been added",
-        "total_nodes": list(blockchain.nodes),
+        "message": "Nodes have been added",
+        "total_nodes": [node for node in blockchain.nodes],
     }
-    return jsonify(response), 201
+    return jsonify(response), 200
 
 
 if __name__ == "__main__":
