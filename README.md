@@ -1,5 +1,7 @@
 # ⛓️ Proof of Work Blockchain — Python
 
+[![CI](https://github.com/<your-username>/pow-blockchain-python/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-username>/pow-blockchain-python/actions/workflows/ci.yml)
+
 A full-stack implementation of a **Proof of Work (PoW) Blockchain** and a **Blockchain Wallet Client** written in Python.
 
 Built with **FastAPI**, **Clean Architecture**, **PyCryptodome**, and **Docker** — serving both as an educational reference and as a foundation for further production hardening.
@@ -378,7 +380,7 @@ Step 6 — Verify Chain
 ### Phase 5 — Scalability & DevOps
 
 - [ ] **Test coverage gates**: No coverage thresholds are enforced. Add `pytest-cov` and a CI rule that fails below 80% coverage.
-- [ ] **Continuous Integration**: Add a GitHub Actions workflow to run `make lint` and `make test` on every PR.
+- [x] **Continuous Integration**: GitHub Actions workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — runs `flake8`, `black --check`, and `pytest` on every push and pull request to any branch.
 - [ ] **Multi-stage Dockerfile**: The current Dockerfile installs all dev dependencies (flake8, black, pytest) into the production image. Use a multi-stage build to produce a lean runtime image.
 - [ ] **Secrets management**: `.env` is handled via `python-dotenv`. In a cloud deployment, replace with a proper secrets manager (AWS Secrets Manager, HashiCorp Vault), and ensure `.env` is never committed.
 - [ ] **OpenAPI documentation**: FastAPI auto-generates `/docs` (Swagger UI) and `/redoc`. Add `summary`, `description`, `response_model`, and `tags` to all route handlers to produce meaningful API documentation.

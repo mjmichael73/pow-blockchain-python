@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    name: Lint & Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── Lint ────────────────────────────────────────────────────────────────
+
+      - name: Lint — flake8
+        run: flake8 blockchain blockchain_client tests
+
+      - name: Lint — black (check only)
+        run: black --check blockchain blockchain_client tests
+
+      # ── Tests ────────────────────────────────────────────────────────────────
+
+      - name: Run tests
+        env:
+          PYTHONPATH: .
+          MINING_DIFFICULTY: "1"   # Keep PoW fast in CI
+          MINING_REWARD: "1"
+          MINING_SENDER: "The Blockchain"
+          BLOCKCHAIN_PORT: "5001"
+          BLOCKCHAIN_HOST: "0.0.0.0"
+          BLOCKCHAIN_CLIENT_PORT: "8081"
+          BLOCKCHAIN_CLIENT_HOST: "0.0.0.0"
+        run: pytest tests/ -v --tb=short
