@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Set
-from time import time
+from dataclasses import dataclass
+from typing import List, Optional
 from collections import OrderedDict
+
 
 @dataclass
 class Transaction:
@@ -11,11 +11,14 @@ class Transaction:
     signature: Optional[str] = None
 
     def to_dict(self):
-        return OrderedDict({
-            "sender_public_key": self.sender_public_key,
-            "recipient_public_key": self.recipient_public_key,
-            "amount": self.amount,
-        })
+        return OrderedDict(
+            {
+                "sender_public_key": self.sender_public_key,
+                "recipient_public_key": self.recipient_public_key,
+                "amount": self.amount,
+            }
+        )
+
 
 @dataclass
 class Block:

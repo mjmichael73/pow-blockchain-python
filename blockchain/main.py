@@ -6,14 +6,15 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api.routes import router
-from .application.services import BlockchainService
-from .infrastructure.crypto import CryptoService
-from .infrastructure.p2p import P2PClient
+from blockchain.api.routes import router
+from blockchain.application.services import BlockchainService
+from blockchain.infrastructure.crypto import CryptoService
+from blockchain.infrastructure.p2p import P2PClient
+
 
 def create_app() -> FastAPI:
     app = FastAPI()
-    
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -29,15 +30,20 @@ def create_app() -> FastAPI:
 
     # Attach to app state for dependency injection
     app.state.blockchain_service = blockchain_service
-    
+
     # Static and Templates
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     app.state.templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
-    app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+    app.mount(
+        "/static",
+        StaticFiles(directory=os.path.join(BASE_DIR, "static")),
+        name="static",
+    )
 
     app.include_router(router)
-    
+
     return app
+
 
 load_dotenv()
 app = create_app()
@@ -46,9 +52,15 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument("-p", "--port", default=int(os.getenv("BLOCKCHAIN_PORT", 5001)), type=int, help="port to listen to")
+    parser.add_argument(
+        "-p",
+        "--port",
+        default=int(os.getenv("BLOCKCHAIN_PORT", 5001)),
+        type=int,
+        help="port to listen to",
+    )
     args = parser.parse_args()
     port = args.port
     host = os.getenv("BLOCKCHAIN_HOST", "0.0.0.0")
 
-    uvicorn.run(app, host=host, port=port)
+    uvicorn.run("blockchain.main:app", host=host, port=port, reload=True)

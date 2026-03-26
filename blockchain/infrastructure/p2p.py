@@ -1,6 +1,7 @@
 import requests
-from typing import List, Set, Optional, Dict, Any
+from typing import Set, Optional, Dict, Any
 from urllib.parse import urlparse
+
 
 class P2PClient:
     def __init__(self):

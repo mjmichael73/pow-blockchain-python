@@ -1,11 +1,13 @@
 import json
 import hashlib
 from typing import List, Any
-from .entities import Block, Transaction
+
 
 class BlockchainLogic:
     @staticmethod
-    def valid_proof(transactions: List[Any], last_hash: str, nonce: int, difficulty: int) -> bool:
+    def valid_proof(
+        transactions: List[Any], last_hash: str, nonce: int, difficulty: int
+    ) -> bool:
         guess = (str(transactions) + str(last_hash) + str(nonce)).encode("utf8")
         h = hashlib.new("sha256")
         h.update(guess)
@@ -20,10 +22,15 @@ class BlockchainLogic:
         return h.hexdigest()
 
     @staticmethod
-    def proof_of_work(transactions: List[Any], last_block_dict: dict, difficulty: int) -> int:
+    def proof_of_work(
+        transactions: List[Any], last_block_dict: dict, difficulty: int
+    ) -> int:
         last_hash = BlockchainLogic.hash_block(last_block_dict)
         nonce = 0
         # This is the heavy lifting
-        while BlockchainLogic.valid_proof(transactions, last_hash, nonce, difficulty) is False:
+        while (
+            BlockchainLogic.valid_proof(transactions, last_hash, nonce, difficulty)
+            is False
+        ):
             nonce += 1
         return nonce

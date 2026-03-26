@@ -4,6 +4,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
 
+
 class CryptoService:
     @staticmethod
     def generate_wallet() -> dict:
@@ -12,8 +13,12 @@ class CryptoService:
         public_key = private_key.publickey()
 
         return {
-            "private_key": binascii.hexlify(private_key.export_key(format("DER"))).decode("ascii"),
-            "public_key": binascii.hexlify(public_key.export_key(format("DER"))).decode("ascii"),
+            "private_key": binascii.hexlify(
+                private_key.export_key(format("DER"))
+            ).decode("ascii"),
+            "public_key": binascii.hexlify(public_key.export_key(format("DER"))).decode(
+                "ascii"
+            ),
         }
 
     @staticmethod
